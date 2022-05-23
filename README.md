@@ -266,7 +266,6 @@ urlpatterns = [
 ====
 ```
 
-
 ### ルーティング確認
 
 ```
@@ -336,5 +335,108 @@ python manage.py show_urls
 /api/v1/books/<pk>/     apiv1.views.BookViewSet apiv1:book-detail
 /api/v1/books/<pk>\.<format>/   apiv1.views.BookViewSet apiv1:book-detail
 /api/v1/books\.<format>/        apiv1.views.BookViewSet apiv1:book-list
+```
+
+### ソース解説
+
+#### viewが2個
+- HomePage.vue
+- LoginPage.vue
+
+#### それぞれに対応するURLはここで設定
+```
+frontend/src/router/index.js
+====
+const routes = [
+  {
+    path: "/",
+    component: HomePage,
+    // ログインが必要な画面には「requiresAuth」フラグを付けておく
+    meta: { requiresAuth: true }
+  },
+  {
+    path: "/login",
+    component: LoginPage
+  },
+```
+
+
+#### Stateは大きく分けて2個
+```
+rontend/src/store/index.js
+====
+// 認証情報
+const authModule = {
+  namespaced: true,
+  state: {
+    username: "",
+    isLoggedIn: false
+  },
+
+// グローバルメッセージ
+const messageModule = {
+  namespaced: true,
+  state: {
+    error: "",
+    warnings: [],
+    info: ""
+  },
+```
+
+
+#### なお、ReactのsetState的な役割を持つ関数がこれ
+```
+rontend/src/store/index.js
+====
+mutations: {
+  set(state, payload) {
+    state.username = payload.user.username;
+    state.isLoggedIn = true;
+  },
+  clear(state) {
+    state.username = "";
+    state.isLoggedIn = false;
+  }
+},
+```
+
+### frontend/src/views/LoginPage.vue
+
+#### ユーザ情報を入力するフォームである
+```
+空のフォームオブジェクトを用意
+====
+data() {
+  return {
+    // 入力フォームの内容
+    form: {
+      username: "",
+      password: ""
+    }
+  };
+},
+
+HTML部分は解説しない
+```
+
+#### ログインボタンをしたらstore の状態を更新した後に "/" リダイレクト
+```
+// ログインボタン押下
+submitLogin: function() {
+  // ログイン実行
+  this.$store
+    .dispatch("auth/login", {
+      username: this.form.username,
+      password: this.form.password
+    })
+    .then(() => {
+      console.log("Login succeeded.");
+      this.$store.dispatch("message/setInfoMessage", {
+        message: "ログインしました。"
+      });
+      // クエリ文字列に「next」がなければ、ホーム画面へ
+      const next = this.$route.query.next || "/";
+      this.$router.replace(next);
+    });
 ```
 
