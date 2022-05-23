@@ -1,9 +1,11 @@
 ## DRF＋Vue.js＋JWT認証（Django REST framework）
 
+### 作業場所
+/home/nisigaki/django04-drf/drf-vue2-sample
+
 ### 構成・バージョン
 
 ```
-/home/nisigaki/django04-drf/drf-vue2-sample
 .
 |-config/
 | |-__init__.py
